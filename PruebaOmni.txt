@@ -1,0 +1,79 @@
+sub PruebaOmni()
+
+'Validar si existe archivo input
+
+FilePath = "C:\Users\Juan Camilo Caro\Desktop\PruebaOmniCorreos.csv"
+FileMailExists = Dir(FilePath)
+
+If FileMailExists = "" Then
+     Set fs = CreateObject("Scripting.FileSystemObject")
+     Set a = fs.CreateTextFile(FilePath, True)
+    a.Close
+End If
+
+
+'Generar data aleatoria (nombre y apellido)
+For k = 1 To 50
+Letter = "abcdefghijklmnopqrstuvwxyz"
+m = Len(Letter)
+    For i = 1 To 5
+        j = 1 + Int(m * Rnd())
+        s = s & Mid(Letter, j, 1)
+    Next i
+Name = s
+s = ""
+Letter = "abcdefghijklmnopqrstuvwxyz"
+m = Len(Letter)
+    For i = 1 To 5
+        j = 1 + Int(m * Rnd())
+        s = s & Mid(Letter, j, 1)
+    Next i
+LastName = s
+
+Email = Name & "." & LastName & "@testmail.com"
+Set fs = CreateObject("Scripting.FileSystemObject")
+Set f = fs.OpenTextFile(FilePath, 8, TristateFalse)
+f.WriteLine (Email)
+f.Close
+Next k
+
+'Validar si ya existe el archivo transformado
+NewFileName = "C:\Users\Juan Camilo Caro\Desktop\PruebaOmniNuevosCorreos.csv"
+FileExists = Dir(NewFileName)
+
+If FileExists = "" Then
+     Set fs = CreateObject("Scripting.FileSystemObject")
+     Set a = fs.CreateTextFile(NewFileName, True)
+     a.WriteLine ("name;lastname;email")
+     a.Close
+End If
+' Ciclo para leer el CSV de correos
+Open FilePath For Input As #1
+Do Until EOF(1)
+
+    Line Input #1, LineFromFile
+    If LineFromFile <> "" Then
+    LineItems = Split(LineFromFile, ",")
+    Flag = 0
+    ' Condicioanl para reemlazar el dominio del correo
+        If InStr(LineItems(0), "@testmail.com") > 0 Then
+                LineItems(0) = Replace(LineItems(0), "@testmail.com", "@newmail.com")
+                Email = LineItems(0)
+                Flag = 1
+        End If
+        ' Obtener Nombre, Apellido y Correo
+        If Flag = 1 Then
+            LineItemsName = LineItems(0)
+            LineItemsName = Replace(LineItemsName, "@newmail.com", "")
+            LineItemsName = Split(LineItemsName, ".")
+        'Escribir en el nuevo archivo csv los datos transformado
+            textData = LineItemsName(0) & ";" & LineItemsName(1) & ";" & Email
+            Set fs = CreateObject("Scripting.FileSystemObject")
+            Set O = fs.OpenTextFile(NewFileName, 8, TristateFalse)
+            O.WriteLine (textData)
+            O.Close
+        End If
+    End If
+Loop
+Close #1
+End Sub
